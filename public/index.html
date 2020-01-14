@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html lang="de">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Kontakt - Moritz Mechelk</title>
+
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="res/style.css">
+
+	<!-- Icon -->
+	<link rel="icon" href="res/favicon.ico">
+
+	<!-- Firebase Initialisierung -->
+	<script defer src="/__/firebase/6.4.2/firebase-app.js"></script>
+	<script defer src="/__/firebase/init.js"></script>
+
+	<!-- Skript -->
+	<script defer src="https://www.google.com/recaptcha/api.js"></script>
+	<script defer src="res/main.js"></script>
+</head>
+
+<body>
+	<header>
+		<h1>Kontakt</h1>
+	</header>
+
+	<div class="container">
+		<section>
+			<div class="info">
+				<p><strong>Hinterlassen Sie eine Nachricht</strong></p>
+				<div id="server-dom"></div>
+			</div>
+
+			<form id="contact-form" class="form">
+				<div class="form-group">
+					<label>Name</label>
+					<input id="name" type="text" name="name">
+				</div>
+				<div class="form-group">
+					<label>E-Mail</label>
+					<input id="email" type="email" name="email">
+				</div>
+				<div class="form-group">
+					<label>Nachricht</label>
+					<textarea id="msg" name="message"></textarea>
+				</div>
+				<div class="g-recaptcha" data-sitekey="6LcBr7gUAAAAAKMfu_N8rGuSMZlwM3kXPpcyv8Ie"></div>
+				<div class="form-group">
+					<input type="submit" value="Senden" name="">
+				</div>
+			</form>
+		</section>
+	</div>
+
+	<footer>
+		<p>&copy; 2019, Moritz Mechelk</p>
+	</footer>
+</body>
+
+</html>
