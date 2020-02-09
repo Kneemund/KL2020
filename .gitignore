@@ -2,6 +2,7 @@ functions/node_modules/
 functions/package-lock.json
 functions/.env
 functions/.eslintrc.json
+functions/.runtimeconfig.json
 firebase-debug.log
 .firebaserc
 .firebase

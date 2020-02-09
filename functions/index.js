@@ -1,11 +1,9 @@
-// Variablen
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const nodemailer = require('nodemailer');
 const express = require('express');
 const request = require('request');
 
-// Initialisierung
 admin.initializeApp();
 const app = express();
 
@@ -17,7 +15,6 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
-// Middleware
 function sendMail(data) {
 	const mailOptions = {
 		from: functions.config().gmail.mail,
@@ -36,72 +33,54 @@ function sendMail(data) {
 	transporter.sendMail(mailOptions);
 }
 
-// Express
+function verifyServer(name, email, message, captcha) {
+	// Mindestens ein Feld leer
+	if (name === '' || email === '' || message === '') return 1;
+
+	// Nachricht oder E-Mail Adresse zu lang
+	if (name.length > 30 || email.length > 40) return 2;
+
+	// reCAPTCHA wurde nicht ausgefüllt
+	if (captcha === undefined || captcha === '' || captcha === null) return 3;
+
+	return 0;
+}
+
+function verifyCaptcha(captcha, ip) {
+	const secretKey = functions.config().recaptcha.secretkey;
+	const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}&remoteip=${ip}`;
+
+	return request(verifyUrl, (_err, _response, body) => {
+		body = JSON.parse(body);
+		return body.success !== undefined && body.success;
+	});
+}
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Reagiert auf POST Requests von "/api/contact"
+// POST Anfragen an "/api/contact"
 app.post('/api/contact', (req, res) => {
-	// Validierung der Eingabe
-	if (req.body.contact.name === '' || req.body.contact.email === '' || req.body.contact.message === '') {
-		// Mindestens ein Feld ist leer
-		return res.json({
-			success: false,
-			captcha: undefined,
-			code: 1
-		});
+	// Eingabe
+	const codeServer = verifyServer(
+		req.body.contact.name,
+		req.body.contact.email,
+		req.body.contact.message,
+		req.body.captcha
+	);
+	if (codeServer !== 0) {
+		return res.json({ code: codeServer });
 	}
 
-	if (req.body.contact.name.length > 30 || req.body.contact.email.length > 40) {
-		// Die Nachricht oder die E-Mail Adresse ist zu lang
-		return res.json({
-			success: false,
-			captcha: undefined,
-			code: 2
-		});
-	}
-
-	if (req.body.captcha === undefined || req.body.captcha === '' || req.body.captcha === null) {
-		// ReCaptcha wurde nicht ausgefüllt
-		return res.json({
-			success: false,
-			captcha: undefined,
-			code: 3
-		});
-	}
-
-	// Captcha Validierung
-	const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${functions.config().recaptcha
-		.secretkey}&response=${req.body.captcha}&remoteip=${req.connection.remoteAddress}`;
-
-	const captcha = request(verifyUrl, (_err, _response, body) => {
-		body = JSON.parse(body);
-
-		if (body.success !== undefined || !body.success) {
-			return false;
-		}
-
-		return true;
-	});
-
+	// reCAPTCHA
+	const captcha = verifyCaptcha(req.body.captcha, req.connection.remoteAddress);
 	if (!captcha) {
-		// ReCaptcha ist falsch
-		return res.json({
-			success: false,
-			captcha: captcha,
-			code: 4
-		});
+		return res.json({ code: 4 });
 	}
 
-	// Daten haben Validierung bestanden
-
+	// Validierung bestanden
 	sendMail(req.body.contact);
-
-	return res.json({
-		success: true,
-		captcha: captcha,
-		code: 0
-	});
+	return res.json({ code: 0 });
 });
 
 exports.contactRequest = functions.https.onRequest(app);

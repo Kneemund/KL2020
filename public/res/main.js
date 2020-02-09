@@ -1,8 +1,7 @@
-// Variablen
 const contactform = document.getElementById('contact-form');
 const dom = document.getElementById('server-dom');
 
-// Media Query, die das ReCaptcha bei kleinen Geräten kompakt erscheinen lässt
+// Media Query, die das reCAPTCHA bei kleinen Geräten kompakt erscheinen lässt
 if (window.matchMedia('screen and (max-width: 992px)').matches) {
 	document.querySelector('.g-recaptcha').setAttribute('data-size', 'compact');
 }
@@ -55,17 +54,35 @@ function setStatus(code, color, timeout) {
 	}
 }
 
+function verifyClient(name, email, message, captcha) {
+	// Mindestens ein Feld leer
+	if (name === '' || email === '' || message === '') return 1;
+
+	// Nachricht oder E-Mail Adresse zu lang
+	if (name.length > 30 || email.length > 40) return 2;
+
+	// reCAPTCHA wurde nicht ausgefüllt
+	if (captcha === undefined || captcha === '' || captcha === null) return 3;
+
+	return 0;
+}
+
 async function postContactRequest(name, email, message, captcha) {
+	const clientCode = verifyClient(name, email, message, captcha);
+	if (clientCode !== 0) {
+		setStatus(clientCode, '#f00', false);
+		return;
+	}
+
 	try {
 		const res = await fetch('/api/contact', {
-			// POST URL: /api/contact
-			method: 'POST', // Methode: POST
+			// POST Anfrage an /api/contact
+			method: 'POST',
 			headers: {
 				Accept: 'application/json, text/plain, */*', // Akzeptierte Antworten
 				'Content-Type': 'application/json' // Typ der Anfrage
 			},
 			body: JSON.stringify({
-				// wandelt JavaScript Objekt in JSON String um
 				contact: {
 					name: name,
 					email: email,
@@ -77,18 +94,12 @@ async function postContactRequest(name, email, message, captcha) {
 
 		const data = await res.json();
 
-		console.log(data);
-
-		if (data.success) {
-			setStatus(data.code, '#0f0', true);
+		if (data.code === 0) {
+			setStatus(0, '#0f0', true);
 			contactform.reset();
 		} else {
 			setStatus(data.code, '#f00', false);
-			console.error(
-				`Anfrage gescheitert oder zurückgewiesen\nFehler: ${translateCode(
-					data.code
-				)}\nReCaptcha: ${data.captcha}`
-			);
+			console.error(`Anfrage gescheitert oder zurückgewiesen\nFehler: ${translateCode(data.code)}`);
 		}
 
 		grecaptcha.reset();
