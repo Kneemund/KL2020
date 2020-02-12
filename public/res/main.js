@@ -1,4 +1,3 @@
-const contactform = document.getElementById('contact-form');
 const dom = document.getElementById('server-dom');
 
 // Media Query, die das reCAPTCHA bei kleinen Geräten kompakt erscheinen lässt
@@ -6,10 +5,10 @@ if (window.matchMedia('screen and (max-width: 992px)').matches) {
 	document.querySelector('.g-recaptcha').setAttribute('data-size', 'compact');
 }
 
-// Funktion "submitData" wird bei Abschicken des Formulares ausgeführt
+const contactform = document.getElementById('contact-form');
 contactform.addEventListener('submit', submitData);
 
-// Ersetzt alle ('g') Zeilenumbrüche in Strings ('\n') mit dem äquivalenten Zeichen von HTML, da die E-Mail in HTML geschrieben wird.
+// Ersetzt alle ('g') Zeilenumbrüche des Strings ('\n') mit dem äquivalenten Zeichen von HTML ('<br/>'), da die E-Mail in HTML geschrieben wird.
 function convertToHTML(msg) {
 	return msg.replace(new RegExp('\n', 'g'), '<br/>');
 }
@@ -17,12 +16,12 @@ function convertToHTML(msg) {
 function submitData(e) {
 	e.preventDefault();
 
-	postContactRequest(
-		document.getElementById('name').value.trim(),
-		document.getElementById('email').value.trim(),
-		convertToHTML(document.getElementById('msg').value.trim()),
-		document.getElementById('g-recaptcha-response').value
-	);
+	const name = document.getElementById('name').value.trim();
+	const email = document.getElementById('email').value.trim();
+	const msg = document.getElementById('msg').value.trim();
+	const recaptcha = document.getElementById('g-recaptcha-response').value;
+
+	postContactRequest(name, email, convertToHTML(msg), recaptcha);
 }
 
 const error = [
@@ -30,7 +29,8 @@ const error = [
 	'Bitte fülle alle Felder aus.',
 	'Der Name bzw. die E-Mail Adresse ist zu lang.',
 	'Bitte fülle das ReCaptcha aus.',
-	'Das ReCaptcha ist falsch.'
+	'Das reCAPTCHA ist falsch.',
+	'Server kann nicht erreicht werden.'
 ];
 
 function translateCode(code) {
@@ -79,8 +79,8 @@ async function postContactRequest(name, email, message, captcha) {
 			// POST Anfrage an /api/contact
 			method: 'POST',
 			headers: {
-				Accept: 'application/json, text/plain, */*', // Akzeptierte Antworten
-				'Content-Type': 'application/json' // Typ der Anfrage
+				Accept: 'application/json, text/plain, */*',
+				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
 				contact: {
@@ -104,7 +104,7 @@ async function postContactRequest(name, email, message, captcha) {
 
 		grecaptcha.reset();
 	} catch (err) {
-		setStatus('Server kann nicht erreicht werden.', '#f00', false);
+		setStatus(5, '#f00', false);
 		console.error(err);
 	}
 }
