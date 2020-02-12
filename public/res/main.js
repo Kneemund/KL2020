@@ -25,12 +25,12 @@ function submitData(e) {
 }
 
 const error = [
-	'Nachricht wurde erfolgreich gesendet.',
+	'Die Nachricht wurde erfolgreich gesendet.',
 	'Bitte fülle alle Felder aus.',
 	'Der Name bzw. die E-Mail Adresse ist zu lang.',
-	'Bitte fülle das ReCaptcha aus.',
+	'Bitte fülle das reCAPTCHA aus.',
 	'Das reCAPTCHA ist falsch.',
-	'Server kann nicht erreicht werden.'
+	'Der Server kann nicht erreicht werden.'
 ];
 
 function translateCode(code) {
