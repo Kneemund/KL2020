@@ -25,12 +25,12 @@ function submitData(e) {
 }
 
 const error = [
-	'Die Nachricht wurde erfolgreich gesendet.',
-	'Bitte fülle alle Felder aus.',
-	'Der Name bzw. die E-Mail Adresse ist zu lang.',
-	'Bitte fülle das reCAPTCHA aus.',
-	'Das reCAPTCHA ist falsch.',
-	'Der Server kann nicht erreicht werden.'
+	'Die Nachricht wurde erfolgreich gesendet.', // 0
+	'Bitte fülle alle Felder aus.', // 1
+	'Der Name bzw. die E-Mail Adresse ist zu lang.', // 2
+	'Bitte fülle das reCAPTCHA aus.', // 3
+	'Das reCAPTCHA ist falsch.', // 4
+	'Der Server kann nicht erreicht werden.' // 5
 ];
 
 function translateCode(code) {
@@ -76,7 +76,6 @@ async function postContactRequest(name, email, message, captcha) {
 
 	try {
 		const res = await fetch('/api/contact', {
-			// POST Anfrage an /api/contact
 			method: 'POST',
 			headers: {
 				Accept: 'application/json, text/plain, */*',
